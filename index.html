@@ -769,7 +769,7 @@ body.full-map-open .fullMapClose{
           <div class="homeMapWrap">
       <div id="homeMiniMap" aria-label="일정 동선 미리보기"></div>
       <button class="homeMapTapCover" id="openFullMap" type="button" aria-label="전체 지도 열기">
-        <span>🗺️ 터치해서 전체 지도 보기</span>
+        <span>🗺️ 두 번 터치해서 전체 지도 보기</span>
       </button>
     </div>
           <div class="home-route-tabs">
@@ -1348,8 +1348,29 @@ document.querySelector('.mascot')?.addEventListener('touchend',e=>{e.preventDefa
   };
 
   if(openBtn){
-    openBtn.addEventListener('click', openMap);
-    openBtn.addEventListener('touchend', openMap, {passive:false});
+    // 전체 지도는 더블 탭/더블 클릭으로만 열기
+    let lastTap = 0;
+
+    openBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const now = Date.now();
+      if(now - lastTap <= 420){
+        lastTap = 0;
+        openMap(e);
+      }else{
+        lastTap = now;
+      }
+    }, {passive:false});
+
+    openBtn.addEventListener('dblclick', openMap);
+
+    // iOS에서 touch 후 생성되는 단일 click이 전체지도를 열지 않게 차단
+    openBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
   }
   if(closeBtn){
     closeBtn.addEventListener('click', closeMap);
